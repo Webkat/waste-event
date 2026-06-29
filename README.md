@@ -16,16 +16,23 @@ CSV-filer → WasteEventService.Listen() → BackgroundService → DTO-mapping
   klienter via `System.Threading.Channels`, så flere operatører kan dele samme stream.
 - **Kontrakt:** hvert event mappes til en flad DTO med en `eventType`-diskriminator.
 
-Se `SOLUTION_NOTES.md` for uddybende beslutninger, begrundelser og interview-noter.
+## Kør med Docker (anbefalet)
 
-## Forudsætninger
+Kræver Docker Desktop. Fra repo-roden:
 
-- .NET 10 SDK
-- Node.js (med npm)
+```
+docker compose up --build
+```
 
-## Kør projektet
+Åbn http://localhost:8080
 
-To dele, hver i sin terminal.
+Compose starter to containere: backend (ASP.NET Core) og frontend (Vue-app
+serveret af nginx). nginx serverer den byggede frontend og proxy'er `/api`-kald
+videre til backend, så alt kører på samme origin — ingen CORS-opsætning nødvendig.
+
+## Kør lokalt uden Docker
+
+Kræver .NET 10 SDK og Node.js. To dele, hver i sin terminal.
 
 ### Backend
 
@@ -62,3 +69,10 @@ npm run dev
 
 `speedMultiplier` styres i `WasteEventApi/appsettings.json` under `WasteEvents:SpeedMultiplier`
 (standard 120). Højere værdi = hurtigere replay af det simulerede datasæt.
+
+## Bemærk om replay
+
+`WasteEventService.Listen()` afspiller datasættet én gang fra app-start og stopper,
+når der ikke er flere events. En klient ser events fra det øjeblik den forbinder —
+der er ingen historik eller loop. Genstart backend (eller `docker compose up`) for
+at afspille datasættet forfra.

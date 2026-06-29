@@ -102,7 +102,7 @@
   )
 
   onMounted(() => {
-    eventSource = new EventSource('http://localhost:5180/api/events/stream')
+    eventSource = new EventSource('/api/events/stream')
 
     eventSource.onmessage = event => {
       const data = JSON.parse(event.data)

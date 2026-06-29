@@ -1,0 +1,16 @@
+﻿services:
+  backend:
+    build:
+      context: .
+      dockerfile: WasteEventApi/Dockerfile
+    # Ingen ports udadtil noedvendigt - kun frontend-proxyen taler med backend,
+    # og det sker paa det interne Docker-netvaerk.
+
+  frontend:
+    build:
+      context: ./WasteEventFrontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend

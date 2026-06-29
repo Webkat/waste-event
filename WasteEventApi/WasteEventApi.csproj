@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>WasteEventApi</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\WasteEventLib\WasteEventLib.csproj" />
+    </ItemGroup>
+
+    <!--
+        WasteEventService.Listen() reads the CSV files from the current working
+        directory using relative paths. They live in WasteEventLib and are only
+        copied to *that* project's output, so we link them here to make sure they
+        land next to this API's binaries. Combined with Directory.SetCurrentDirectory
+        in Program.cs, this resolves the paths regardless of how the app is launched
+        (dotnet run, Visual Studio, or a published build). The source files are not
+        modified — they are only referenced.
+    -->
+    <ItemGroup>
+        <None Include="..\WasteEventLib\positions.csv" Link="positions.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="..\WasteEventLib\requests.csv" Link="requests.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="..\WasteEventLib\services.csv" Link="services.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+</Project>

@@ -1,38 +1,38 @@
 # Waste2x – Live Field Activity Dashboard
 
-Real-time dashboard der viser live field activity (lastbiler, indsamlingsanmodninger
-og service-status) for et waste management-system. Backend forbruger den udleverede
-`WasteEventService` event-stream og eksponerer den til en Vue 3-frontend via SSE.
+Real-time dashboard that shows live field activity (trucks, collection requests
+and service status) for a waste management system. The backend consumes the provided
+`WasteEventService` event stream and exposes it to a Vue 3 frontend via SSE.
 
-## Arkitektur
+## Architecture
 
 ```
-CSV-filer → WasteEventService.Listen() → BackgroundService → DTO-mapping
-   → Channel fan-out → SSE-endpoint → EventSource → Vue store → kort + feed + summary
+CSV files → WasteEventService.Listen() → BackgroundService → DTO mapping
+   → Channel fan-out → SSE endpoint → EventSource → Vue store → map + feed + summary
 ```
 
-- **Transport:** Server-Sent Events (SSE) — én-vejs stream, native browser-support.
-- **Fan-out:** kilden læses én gang i en `BackgroundService` og broadcastes til alle
-  klienter via `System.Threading.Channels`, så flere operatører kan dele samme stream.
-- **Kontrakt:** hvert event mappes til en flad DTO med en `eventType`-diskriminator.
+- **Transport:** Server-Sent Events (SSE) — one-way stream, native browser support.
+- **Fan-out:** the source is read once in a `BackgroundService` and broadcast to all
+  clients via `System.Threading.Channels`, so multiple operators can share the same stream.
+- **Contract:** each event is mapped to a flat DTO with an `eventType` discriminator.
 
-## Kør med Docker (anbefalet)
+## Run with Docker (recommended)
 
-Kræver Docker Desktop. Fra repo-roden:
+Requires Docker Desktop. From the repository root:
 
 ```
 docker compose up --build
 ```
 
-Åbn http://localhost:8080
+Open http://localhost:8080
 
-Compose starter to containere: backend (ASP.NET Core) og frontend (Vue-app
-serveret af nginx). nginx serverer den byggede frontend og proxy'er `/api`-kald
-videre til backend, så alt kører på samme origin — ingen CORS-opsætning nødvendig.
+Compose starts two containers: backend (ASP.NET Core) and frontend (Vue app
+served by nginx). nginx serves the built frontend and proxies `/api` calls to the
+backend, so everything runs on the same origin — no CORS configuration needed.
 
-## Kør lokalt uden Docker
+## Run locally without Docker
 
-Kræver .NET 10 SDK og Node.js. To dele, hver i sin terminal.
+Requires the .NET 10 SDK and Node.js. Two parts, each in its own terminal.
 
 ### Backend
 
@@ -41,7 +41,7 @@ cd WasteEventApi
 dotnet run --urls "http://localhost:5180"
 ```
 
-Streamen kan testes direkte i en browser eller med:
+The stream can be tested directly in a browser or with:
 
 ```
 curl.exe -N http://localhost:5180/api/events/stream
@@ -55,24 +55,24 @@ npm install
 npm run dev
 ```
 
-Åbn http://localhost:3000
+Open http://localhost:3000
 
-## Projektstruktur
+## Project structure
 
-| Mappe | Indhold |
+| Folder | Contents |
 |---|---|
-| `WasteEventLib/` | Udleveret event-model, service og CSV-data (uændret) |
-| `WasteEventApi/` | ASP.NET Core backend: SSE-endpoint, DTO-mapping, broadcaster, hosted service |
+| `WasteEventLib/` | Provided event model, service and CSV data (unchanged) |
+| `WasteEventApi/` | ASP.NET Core backend: SSE endpoint, DTO mapping, broadcaster, hosted service |
 | `WasteEventFrontend/` | Vue 3 + Vuetify + OpenLayers dashboard |
 
-## Konfiguration
+## Configuration
 
-`speedMultiplier` styres i `WasteEventApi/appsettings.json` under `WasteEvents:SpeedMultiplier`
-(standard 120). Højere værdi = hurtigere replay af det simulerede datasæt.
+`speedMultiplier` is set in `WasteEventApi/appsettings.json` under `WasteEvents:SpeedMultiplier`
+(default 120). A higher value means faster replay of the simulated dataset.
 
-## Bemærk om replay
+## Note on replay
 
-`WasteEventService.Listen()` afspiller datasættet én gang fra app-start og stopper,
-når der ikke er flere events. En klient ser events fra det øjeblik den forbinder —
-der er ingen historik eller loop. Genstart backend (eller `docker compose up`) for
-at afspille datasættet forfra.
+`WasteEventService.Listen()` replays the dataset once from app start and stops when
+there are no more events. A client sees events from the moment it connects — there
+is no history or loop. Restart the backend (or `docker compose up`) to replay the
+dataset from the beginning.
